@@ -18,6 +18,9 @@ import enchant
 
 from keras.models import model_from_json
 
+from cvzone.HandTrackingModule import HandDetector
+
+
 os.environ["THEANO_FLAGS"] = "device=cuda, assert_no_cpu_op=True"
 
 #Application :
@@ -28,6 +31,7 @@ class Application:
 
 		self.hs = Hunspell("en_US")
 		self.vs = cv2.VideoCapture(0)
+		self.detector = HandDetector(detectionCon=0.7, maxHands=2)
 		self.current_image = None
 		self.current_image2 = None
 		self.json_file = open("Models/model_new.json", "r")
@@ -123,16 +127,41 @@ class Application:
 
 	def video_loop(self):
 		ok, frame = self.vs.read()
-
+		
 		if ok:
 			cv2image = cv2.flip(frame, 1)
+			hands = self.detector.findHands(frame, draw=False)  # with draw
 
-			x1 = int(0.5 * frame.shape[1])
-			y1 = 10
-			x2 = frame.shape[1] - 10
-			y2 = int(0.5 * frame.shape[1])
+			if len(hands)==1:
+				bbox1 = hands[0]["bbox"] # x, y, w, h
+				x1 = int(bbox1[0])
+				x2 = int(bbox1[2]+x1)
+				y1 = int(bbox1[1])
+				y2 = int(bbox1[3]+y1)
 
-			cv2.rectangle(frame, (x1 - 1, y1 - 1), (x2 + 1, y2 + 1), (255, 0, 0) ,1)
+
+				
+				
+
+			else:
+
+				x1 = int(0.5*frame.shape[1])
+				y1 = 50
+				x2 = frame.shape[1]-10
+				y2 = int(0.5*frame.shape[1])
+
+				# Drawing the ROI
+				# The increment/decrement by 51 is to compensate for the bounding box
+
+			cv2.rectangle(frame, (x1-51, y1-51), (x2+51, y2+51), (255,0,0) ,1)
+
+				# Extracting the ROI
+
+			roi = frame[y1-50:y2+50, x1-50:x2+50]
+
+
+
+			cv2.rectangle(frame, (x1-51, y1-51), (x2+51, y2+51), (255,0,0) ,1)
 			cv2image = cv2.cvtColor(cv2image, cv2.COLOR_BGR2RGBA)
 
 			self.current_image = Image.fromarray(cv2image)

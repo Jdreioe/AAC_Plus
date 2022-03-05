@@ -4,6 +4,8 @@ import time
 import cv2
 import numpy as np
 import os
+from cvzone.HandTrackingModule import HandDetector
+detector = HandDetector(detectionCon=0.7, maxHands=2)
 
 # Creating and Collecting testing Data
 
@@ -61,21 +63,34 @@ def test( x ):
 				4, cv2.LINE_AA)
 
 
-		# Coordinates of the ROI
+		hands = detector.findHands(frame, draw=False)  # with draw
 
-		x1 = int(0.5*frame.shape[1])
-		y1 = 10
-		x2 = frame.shape[1]-10
-		y2 = int(0.5*frame.shape[1])
+		if len(hands)==1:
+			bbox1 = hands[0]["bbox"] # x, y, w, h
+			x1 = int(bbox1[0])
+			x2 = int(bbox1[2]+x1)
+			y1 = int(bbox1[1])
+			y2 = int(bbox1[3]+y1)
 
-		# Drawing the ROI
-		# The increment/decrement by 1 is to compensate for the bounding box
 
-		cv2.rectangle(frame, (x1-1, y1-1), (x2+1, y2+1), (255,0,0) ,1)
+			
+			
 
-		# Extracting the ROI
+		else:
 
-		roi = frame[y1:y2, x1:x2]
+			x1 = int(0.5*frame.shape[1])
+			y1 = 50
+			x2 = frame.shape[1]-10
+			y2 = int(0.5*frame.shape[1])
+
+			# Drawing the ROI
+			# The increment/decrement by 51 is to compensate for the bounding box
+
+		cv2.rectangle(frame, (x1-51, y1-51), (x2+51, y2+51), (255,0,0) ,1)
+
+			# Extracting the ROI
+
+		roi = frame[y1-50:y2+50, x1-50:x2+50]
 
 		cv2.imshow("Frame", frame)
 
@@ -180,19 +195,34 @@ while True:
 
 	# Coordinates of the ROI
 	
-	x1 = int(0.5*frame.shape[1])
-	y1 = 10
-	x2 = frame.shape[1]-10
-	y2 = int(0.5*frame.shape[1])
+	hands = detector.findHands(frame, draw=False)  # with draw
 
-	# Drawing the ROI
-	# The increment/decrement by 1 is to compensate for the bounding box
-	
-	cv2.rectangle(frame, (x1-1, y1-1), (x2+1, y2+1), (255,0,0) ,1)
-	
-	# Extracting the ROI
-	
-	roi = frame[y1:y2, x1:x2]
+	if len(hands)==1:
+		bbox1 = hands[0]["bbox"] # x, y, w, h
+		x1 = int(bbox1[0])
+		x2 = int(bbox1[2]+x1)
+		y1 = int(bbox1[1])
+		y2 = int(bbox1[3]+y1)
+
+
+		
+		
+
+	else:
+
+		x1 = int(0.5*frame.shape[1])
+		y1 = 50
+		x2 = frame.shape[1]-10
+		y2 = int(0.5*frame.shape[1])
+
+		# Drawing the ROI
+		# The increment/decrement by 51 is to compensate for the bounding box
+
+	cv2.rectangle(frame, (x1-51, y1-51), (x2+51, y2+51), (255,0,0) ,1)
+
+		# Extracting the ROI
+
+	roi = frame[y1-50:y2+50, x1-50:x2+50]
 
 	cv2.imshow("Frame", frame)
 	
