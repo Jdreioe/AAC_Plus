@@ -9,14 +9,14 @@ detector = HandDetector(detectionCon=0.7, maxHands=2)
 
 # Creating and Collecting testing Data
 
-mode = 'testingData'
+mode = 'trainingData'
 directory = 'dataSet/' + mode + '/'
 minValue = 35
 
-capture = cv2.VideoCapture(0)
+capture = cv2.VideoCapture(2)
 interrupt = -1
 
-def test( x ):
+def train( x ):
 	TIMER = 3
 	prev = time.time()
 	while TIMER >= 0:
@@ -67,9 +67,17 @@ def test( x ):
 
 		if len(hands)==1:
 			bbox1 = hands[0]["bbox"] # x, y, w, h
-			x1 = int(bbox1[0])
+			# To prevent a situation where roi x1 and roi y1 < 1, if bbox1 < 51, set x1 & y1 to 51
+			if int(bbox1[0]) < 51:
+				x1 = 51
+			else:
+				x1 = int(bbox1[0])
+
 			x2 = int(bbox1[2]+x1)
-			y1 = int(bbox1[1])
+			if int(bbox1[1]) < 51:
+				y1 = 51
+			else:
+				y1 = int(bbox1[1])
 			y2 = int(bbox1[3]+y1)
 
 
@@ -124,7 +132,6 @@ while True:
 	_, frame = capture.read()
 
 	# Simulating mirror Image
-
 	frame = cv2.flip(frame, 1)
 
 	# Getting count of existing images
@@ -199,9 +206,16 @@ while True:
 
 	if len(hands)==1:
 		bbox1 = hands[0]["bbox"] # x, y, w, h
-		x1 = int(bbox1[0])
+		if int(bbox1[0]) < 51:
+			x1 = 51
+		else:
+			x1 = int(bbox1[0])
+
 		x2 = int(bbox1[2]+x1)
-		y1 = int(bbox1[1])
+		if int(bbox1[1]) < 51:
+			y1 = 51
+		else:
+			y1 = int(bbox1[1])
 		y2 = int(bbox1[3]+y1)
 
 
@@ -245,89 +259,89 @@ while True:
 	if interrupt & 0xFF == 27: 
 		# esc key
 		break
-	# rest of if-statements are basicly the same: if key == ord('x') is pressed, do test('x') 
+	# rest of if-statements are basicly the same: if key == ord('x') is pressed, do train('x')
 	if interrupt & 0xFF == ord('0'):
 		
-		test("0")
+		train("0")
 	elif interrupt & 0xFF == ord('a'):
-		test("a")
+		train("a")
 
 	elif interrupt & 0xFF == ord('b'):
-		test("b")
+		train("b")
 	
 	elif interrupt & 0xFF == ord('c'):
-		test("c")
+		train("c")
 	
 	elif interrupt & 0xFF == ord('d'):
-		test("d")
+		train("d")
 	
 	elif interrupt & 0xFF == ord('e'):
-		test("e")
+		train("e")
 	
 	elif interrupt & 0xFF == ord('f'):
-		test("f")
+		train("f")
 	
 	elif interrupt & 0xFF == ord('g'):
-		test("g")
+		train("g")
 	
 	elif interrupt & 0xFF == ord('h'):
-		test("h")
+		train("h")
 	
 	elif interrupt & 0xFF == ord('i'):
-		test("i")
+		train("i")
 	
 	elif interrupt & 0xFF == ord('j'):
-		test("j")
+		train("j")
 	
 	elif interrupt & 0xFF == ord('k'):
-		test("k")
+		train("k")
 	
 	elif interrupt & 0xFF == ord('l'):
-		test("l")
+		train("l")
 	
 	elif interrupt & 0xFF == ord('m'):
-		test("m")
+		train("m")
 	
 	elif interrupt & 0xFF == ord('n'):
-		test("n")
+		train("n")
 	
 	elif interrupt & 0xFF == ord('o'):
-		test("o")
+		train("o")
 	
 	elif interrupt & 0xFF == ord('p'):
-		test("p")
+		train("p")
 	
 	elif interrupt & 0xFF == ord('q'):
-		test("q")
+		train("q")
 	
 	elif interrupt & 0xFF == ord('r'):
-		test("r")
+		train("r")
 	
 	elif interrupt & 0xFF == ord('s'):
-		test("s")
+		train("s")
 	
 	elif interrupt & 0xFF == ord('t'):
-		test("t")
+		train("t")
 	
 	elif interrupt & 0xFF == ord('u'):
-		test("u")
+		train("u")
 	
 	elif interrupt & 0xFF == ord('v'):
-		test("v")
+		train("v")
 	
 	elif interrupt & 0xFF == ord('w'):
-		test("w")
+		train("w")
 	
 	elif interrupt & 0xFF == ord('x'):
-		test("x")
+		train("x")
 	
 	elif interrupt & 0xFF == ord('y'):
-		test("y")
+		train("y")
 	
 	elif interrupt & 0xFF == ord('z'):
-		test("z")
+		train("z")
 	elif interrupt & 0xFF == ord('æ'):
-		test("æ")
+		train("æ")
 	if interrupt != 0xff: 
 		cv2.putText(frame, str("Not "),
 				(200, 250), cv2.FONT_HERSHEY_PLAIN,
