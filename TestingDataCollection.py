@@ -204,7 +204,7 @@ while True:
 	
 	hands = detector.findHands(frame, draw=False)  # with draw
 
-	if len(hands)==1:
+	if len(hands)==1 && hands[0]["type"] == "right":
 		bbox1 = hands[0]["bbox"] # x, y, w, h
 		if int(bbox1[0]) < 51:
 			x1 = 51
