@@ -5,6 +5,9 @@ import cv2
 import numpy as np
 import os
 from cvzone.HandTrackingModule import HandDetector
+from string import ascii_lowercase
+from random import *
+
 detector = HandDetector(detectionCon=0.7, maxHands=2)
 
 # Creating and Collecting testing Data
@@ -13,7 +16,8 @@ mode = 'trainingData'
 directory = 'dataSet/' + mode + '/'
 minValue = 35
 
-capture = cv2.VideoCapture(2)
+capture = cv2.VideoCapture(0)
+
 interrupt = -1
 
 def train( x ):
@@ -65,7 +69,7 @@ def train( x ):
 
 		hands = detector.findHands(frame, draw=False)  # with draw
 
-		if len(hands)==1:
+		if len(hands)==1 and str(hands[0]["type"]) == "Right":
 			bbox1 = hands[0]["bbox"] # x, y, w, h
 			# To prevent a situation where roi x1 and roi y1 < 1, if bbox1 < 51, set x1 & y1 to 51
 			if int(bbox1[0]) < 51:
@@ -122,7 +126,6 @@ def train( x ):
 		
 
 	else:
-		print(x)
 		if str(x) == "0":
 			cv2.imwrite(directory+"0/"+str(count['zero']+1)+'.jpg', test_image)
 		else: 
@@ -203,8 +206,8 @@ while True:
 	# Coordinates of the ROI
 	
 	hands = detector.findHands(frame, draw=False)  # with draw
+	if (len(hands)==1 and str(hands[0]["type"]) == "Left"):
 
-	if len(hands)==1 && hands[0]["type"] == "right":
 		bbox1 = hands[0]["bbox"] # x, y, w, h
 		if int(bbox1[0]) < 51:
 			x1 = 51
@@ -342,11 +345,33 @@ while True:
 		train("z")
 	elif interrupt & 0xFF == ord('æ'):
 		train("æ")
-	if interrupt != 0xff: 
+	if interrupt != 0xff:
 		cv2.putText(frame, str("Not "),
 				(200, 250), cv2.FONT_HERSHEY_PLAIN,
 				7, (0, 255, 255),
 				4, cv2.LINE_AA)
+	if interrupt & 0xff == ord('.'):
+		i = int(input("Select the number of letters that you would like to generate"))
+		
+		d = []
+		for t in range(len(ascii_lowercase)):
+			d.append(ascii_lowercase[t])
+
+		d.append('æ')
+		while i > 0:
+
+			letter = d[randint(0, 26)]
+			
+			cv2.putText(frame, str(letter),
+				(300, 300), cv2.FONT_HERSHEY_PLAIN,
+				7, (0, 255, 255),
+				4, cv2.LINE_AA)
+			print(letter)
+			train(str(letter))
+			i-=1
+
+		print("Done")
+
 
 
 

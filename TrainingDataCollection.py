@@ -6,14 +6,18 @@ from matplotlib.pyplot import draw
 import numpy as np
 import os
 from cvzone.HandTrackingModule import HandDetector
+from string import ascii_lowercase
+from random import *
 detector = HandDetector(detectionCon=0.7, maxHands=2)
+
+
 # Creating and Collecting Training Data
 
-mode = 'trainingData'
+mode = 'testingData'
 directory = 'dataSet/' + mode + '/'
 minValue = 70
 
-capture = cv2.VideoCapture(0)
+capture = cv2.VideoCapture("/dev/video0")
 interrupt = -1
 # train with a timer (I have CP and can only use 1 hand, so a timer is absolutely needed to capture an image with OpenCV)
 def train( x ):
@@ -332,6 +336,31 @@ while True:
 		train("z")
 	if interrupt & 0xFF == ord('æ'):
 		train("æ")
+	if interrupt & 0xff == ord('.'):
+		i = int(input("Select the number of letters that you would like to generate"))
+		
+		d = []
+		for t in range(len(ascii_lowercase)):
+			d.append(ascii_lowercase[t])
+
+		d.append('æ')
+		while i > 0:
+
+			letter = d[randint(0, 26)]
+			
+			cv2.putText(frame, str(letter),
+				(300, 300), cv2.FONT_HERSHEY_PLAIN,
+				7, (0, 255, 255),
+				4, cv2.LINE_AA)
+			print(letter)
+			train(str(letter))
+			i-=1
+
+
+
+
+
+
 
 	
 capture.release()

@@ -21,7 +21,7 @@ from keras.models import model_from_json
 from cvzone.HandTrackingModule import HandDetector
 
 
-os.environ["THEANO_FLAGS"] = "device=cuda, assert_no_cpu_op=True"
+os.environ["THEANO_FLAGS"] = "device=rocm, assert_no_cpu_op=True"
 
 #Application :
 
@@ -31,6 +31,7 @@ class Application:
 
 		self.hs = Hunspell("en_US")
 		self.vs = cv2.VideoCapture(0)
+
 		self.detector = HandDetector(detectionCon=0.7, maxHands=2)
 		self.current_image = None
 		self.current_image2 = None
@@ -69,15 +70,15 @@ class Application:
 		print("Loaded model from disk")
 
 		self.root = tk.Tk()
-		self.root.title("Sign Language To Text Conversion")
+		self.root.title("Håndalfabet til tekst konversion")
 		self.root.protocol('WM_DELETE_WINDOW', self.destructor)
-		self.root.geometry("900x900")
+		self.root.geometry("2000x2000")
 
 		self.panel = tk.Label(self.root)
-		self.panel.place(x = 100, y = 10, width = 580, height = 580)
+		self.panel.place(x = 100, y = 10, width = 1920, height = 1950)
 		
 		self.panel2 = tk.Label(self.root) # initialize image panel
-		self.panel2.place(x = 400, y = 65, width = 275, height = 275)
+		self.panel2.place(x = 1000, y = 65, width = 300, height = 450)
 
 		self.T = tk.Label(self.root)
 		self.T.place(x = 60, y = 5)
@@ -88,25 +89,25 @@ class Application:
 
 		self.T1 = tk.Label(self.root)
 		self.T1.place(x = 10, y = 540)
-		self.T1.config(text = "Character :", font = ("Courier", 30, "bold"))
+		self.T1.config(text = "Bogstav: ", font = ("Courier", 30, "bold"))
 
 		self.panel4 = tk.Label(self.root) # Word
 		self.panel4.place(x = 220, y = 595)
 
 		self.T2 = tk.Label(self.root)
 		self.T2.place(x = 10,y = 595)
-		self.T2.config(text = "Word :", font = ("Courier", 30, "bold"))
+		self.T2.config(text = "Ord: ", font = ("Courier", 30, "bold"))
 
 		self.panel5 = tk.Label(self.root) # Sentence
 		self.panel5.place(x = 350, y = 645)
 
 		self.T3 = tk.Label(self.root)
 		self.T3.place(x = 10, y = 645)
-		self.T3.config(text = "Sentence :",font = ("Courier", 30, "bold"))
+		self.T3.config(text = "Sætning:",font = ("Courier", 30, "bold"))
 
 		self.T4 = tk.Label(self.root)
 		self.T4.place(x = 250, y = 690)
-		self.T4.config(text = "Suggestions :", fg = "red", font = ("Courier", 30, "bold"))
+		self.T4.config(text = "Forslag :", fg = "red", font = ("Courier", 30, "bold"))
 
 		self.bt1 = tk.Button(self.root, command = self.action1, height = 0, width = 0)
 		self.bt1.place(x = 26, y = 745)
@@ -130,47 +131,48 @@ class Application:
 		
 		if ok:
 			cv2image = cv2.flip(frame, 1)
-			hands = self.detector.findHands(frame, draw=False)  # with draw
+			hands = self.detector.findHands(cv2image, draw=False)  # with draw
 
-			if len(hands)==1:
-				bbox1 = hands[0]["bbox"] # x, y, w, h
-				x1 = int(bbox1[0])
-				x2 = int(bbox1[2]+x1)
-				y1 = int(bbox1[1])
-				y2 = int(bbox1[3]+y1)
+			if (len(hands)==1 and str(hands[0]["type"]) == "Left"):
 
 
-				
-				
+				self.bbox1 = hands[0]["bbox"] # x, y, w, h
+				print(self.bbox1[0])
 
+				if int(self.bbox1[0]) < 51:
+					x1 = 51
+				else:
+					x1 = int(self.bbox1[0])
+
+				x2 = int(self.bbox1[2]+x1)
+				if int(self.bbox1[1]) < 51:
+
+					y1 = 51
+
+				else:
+					y1 = int(self.bbox1[1])
+				y2 = int(self.bbox1[3]+y1)				
 			else:
-
 				x1 = int(0.5*frame.shape[1])
 				y1 = 50
 				x2 = frame.shape[1]-10
 				y2 = int(0.5*frame.shape[1])
 
-				# Drawing the ROI
-				# The increment/decrement by 51 is to compensate for the bounding box
 
-			cv2.rectangle(frame, (x1-51, y1-51), (x2+51, y2+51), (255,0,0) ,1)
-
-				# Extracting the ROI
-
-			roi = frame[y1-50:y2+50, x1-50:x2+50]
-
-
-
-			cv2.rectangle(frame, (x1-51, y1-51), (x2+51, y2+51), (255,0,0) ,1)
 			cv2image = cv2.cvtColor(cv2image, cv2.COLOR_BGR2RGBA)
-
 			self.current_image = Image.fromarray(cv2image)
 			imgtk = ImageTk.PhotoImage(image = self.current_image)
 
 			self.panel.imgtk = imgtk
 			self.panel.config(image = imgtk)
+			if len(hands) == 0:
+				cv2image = cv2image[y1: y2, x1: x2]
+				self.panel2.place(x = x1, y = y1, width = x2, height = y2 )
 
-			cv2image = cv2image[y1 : y2, x1 : x2]
+			else:
+				cv2image = cv2image[y1-50: y2+50, x1-50: x2+50]
+				self.panel2.place(x = self.bbox1[0]+70, y = self.bbox1[1]+350, width =self.bbox1[2]+50, height = self.bbox1[3]+50)
+
 
 			gray = cv2.cvtColor(cv2image, cv2.COLOR_BGR2GRAY)
 
@@ -225,11 +227,11 @@ class Application:
 		self.root.after(5, self.video_loop)
 
 	def predict(self, test_image):
-
+		
 		test_image = cv2.resize(test_image, (128, 128))
 
 		result = self.loaded_model.predict(test_image.reshape(1, 128, 128, 1))
-
+		print(result)
 
 		result_dru = self.loaded_model_dru.predict(test_image.reshape(1 , 128 , 128 , 1))
 
@@ -242,6 +244,7 @@ class Application:
 		prediction['blank'] = result[0][0]
 
 		inde = 1
+		ascii_uppercase = "A"
 
 		for i in ascii_uppercase:
 
