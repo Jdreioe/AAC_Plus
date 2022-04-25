@@ -1,8 +1,8 @@
-WIP ASK Program
+# WIP ASK Program
 
 ## Abstract
 
-For the sign language conversion method, the methods used is from [!Sign Language to Text Conversion][https://github.com/RohithAnnapureddy26/Sign-Language-To-Text-Conversion]
+For the sign language conversion method, the methods used is from [Sign Language to Text Conversion](https://github.com/RohithAnnapureddy26/Sign-Language-To-Text-Conversion)
 
 # License
 
